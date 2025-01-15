@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <link rel="stylesheet" href="/public/style.css">
+</head>
+<body>
+
+    <div class="wave">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+        </svg>
+    </div>
+
+    <div class=container>
+        
+        <h1>Currency Converter</h1>
+        <p>Convert currencies instantly with our easy-to-use Currency Converter! Designed for quick and accurate conversions, this tool supports multiple currencies from around the world. <br> Simply input your amount, select the currencies, and get real-time exchange rate conversions to make informed financial decisions whether you're traveling, shopping online, or tracking international investments.</p>
+        
+
+        <div class="converter-form">
+            <div class="input-wrapper"> 
+                <input type="number" id="amount" placeholder="Amount" />
+            </div>
+            
+            <label>From : <br>
+                <select id="fromCurrency"></select>
+            </label>
+            
+            <label>To : <br>
+                <select id="toCurrency"></select>
+            </label>
+    
+            <button onclick="convert()">Convert</button>
+    
+            <p id="result"></p>
+        </div>
+            
+        
+    </div>
+
+    <script>
+        // Function to fetch available currencies and populate the dropdowns
+        async function loadCurrencies() {
+            // Fetch currency codes from the exchange rate API
+            const response = await fetch('https://v6.exchangerate-api.com/v6/3ab70965fa06569a4396f482/codes');
+            const data = await response.json();
+            
+            // Select the dropdown elements for "from" and "to" currencies
+            const fromCurrencySelect = document.getElementById('fromCurrency');
+            const toCurrencySelect = document.getElementById('toCurrency');
+    
+            // Populate the dropdowns with the fetched currency codes
+            data.supported_codes.forEach(currency => {
+                const option = document.createElement('option'); // Create an option element
+                option.value = currency[0]; // Set the value to the currency code
+                option.textContent = `${currency[1]} (${currency[0]})`; // Display the name and code
+                
+                // Append the option to the "from" currency dropdown
+                fromCurrencySelect.appendChild(option);
+                // Clone and append the same option to the "to" currency dropdown
+                toCurrencySelect.appendChild(option.cloneNode(true));
+            });
+        }
+    
+        // Function to handle currency conversion
+        async function convert() {
+            // Get the input values: amount, from currency, and to currency
+            const amount = document.getElementById('amount').value;
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+    
+            try {
+                // Send a request to the server to get the converted amount
+                const response = await fetch(`/convert?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`);
+                const data = await response.json(); // Parse the response as JSON
+                
+                // Display the conversion result in the specified result element
+                document.getElementById('result').innerText = `${amount} ${fromCurrency} is approximately ${data.converted} ${toCurrency}`;
+            } catch (error) {
+                // Display an error message in case of any issues
+                document.getElementById('result').innerText = 'Error: ' + error.message;
+            }
+        }
+    
+        // Load currency options into the dropdowns when the page loads
+        window.onload = loadCurrencies;
+    </script>
+    
+</body>
+</html>
